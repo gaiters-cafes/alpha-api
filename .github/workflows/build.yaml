@@ -1,0 +1,113 @@
+name: Build, Scan, and Push OCI Image
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'app/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.build.outputs.IMAGE_TAG }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+
+      - name: Build the OCI image
+        id: build
+        working-directory: ./app
+        run: |
+          TAG=$(date +%s)
+          podman build . --file Containerfile --tag av-api:$TAG
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Save OCI image as tarball
+        run: |
+          podman save -o av-api.tar av-api:${{ env.IMAGE_TAG }}
+
+      - name: Upload OCI image tarball as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: av-api-image
+          path: av-api.tar
+
+  scan:
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.tag.outputs.IMAGE_TAG }}
+    needs: build
+    steps:
+      - name: Set Image Tag
+        id: tag
+        run: echo "IMAGE_TAG=${{ needs.build.outputs.image-tag }}" >> $GITHUB_OUTPUT
+      - name: Download OCI image tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: av-api-image
+
+      - name: Set up Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+
+      - name: Load OCI image from tarball
+        run: podman load -i av-api.tar
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.43.0/trivy_0.43.0_Linux-64bit.deb
+          sudo dpkg -i trivy_0.43.0_Linux-64bit.deb
+
+      - name: Scan OCI Image with Trivy
+        env:
+          DOCKER_HOST: unix:///run/user/$(id -u)/podman/podman.sock
+        run: |
+          trivy image --format table --output trivy-report.txt av-api:${{ needs.build.outputs.image-tag }}
+
+      - name: Upload scan report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-scan-report
+          path: trivy-report.txt
+
+  push:
+    runs-on: ubuntu-latest
+    needs: scan
+    steps:
+      - name: Download OCI image tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: av-api-image
+
+      - name: Set up Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+
+      - name: Load OCI image from tarball
+        run: podman load -i av-api.tar
+
+      - name: Log in to DigitalOcean Container Registry
+        run: |
+          echo "${{ secrets.DO_REGISTRY_TOKEN }}" | podman login ${{ secrets.DO_REGISTRY_URL }} --username ${{ secrets.DO_REGISTRY_USERNAME }} --password-stdin
+
+      - name: Tag and Push OCI Image to DigitalOcean Registry
+        run: |
+          podman tag av-api:${{ needs.scan.outputs.image-tag }} ${{ secrets.DO_REGISTRY_URL }}/av-api:${{ needs.scan.outputs.image-tag }}
+          podman push ${{ secrets.DO_REGISTRY_URL }}/av-api:${{ needs.scan.outputs.image-tag }}
