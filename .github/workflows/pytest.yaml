@@ -38,7 +38,6 @@ jobs:
       run: |
         echo "API_KEY=${{ secrets.VANTAGE_API_KEY }}" > .config
         echo "LOG_LEVEL=${{ secrets.LOG_LEVEL }}" >> .config
-        cat .config
 
     - name: Run Pytest
       working-directory: ./app
