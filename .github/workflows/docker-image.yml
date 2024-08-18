@@ -7,12 +7,15 @@ on:
     branches: [ "main" ]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+    - name: Set up Podman
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y podman
     - name: Build the Docker image
-      run: podman build . --file app/Containerfile --tag my-image-name:$(date +%s)
+      working-directory: ./app
+      run: podman build . --file Containerfile --tag my-image-name:$(date +%s)
