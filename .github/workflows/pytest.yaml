@@ -9,6 +9,7 @@ jobs:
   test:
     if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
+    environment: DEV
     
     steps:
     - name: Checkout code
@@ -32,7 +33,7 @@ jobs:
     - name: Create .config file with secrets
       working-directory: ./app
       run: |
-        echo "API_KEY=${{ secrets.API_KEY }}" > .config
+        echo "API_KEY=${{ secrets.VANTAGE_API_KEY }}" > .config
         echo "LOG_LEVEL=${{ secrets.LOG_LEVEL }}" >> .config
         cat .config
 
