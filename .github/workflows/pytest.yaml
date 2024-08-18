@@ -29,6 +29,12 @@ jobs:
       run: |
         poetry install
 
+    - name: Create .config file with secrets
+      working-directory: ./app
+      run: |
+        echo "API_KEY=${{ secrets.API_KEY }}" > .config
+        echo "LOG_LEVEL=${{ secrets.LOG_LEVEL }}" >> .config
+
     - name: Run Pytest
       working-directory: ./app
       run: |
