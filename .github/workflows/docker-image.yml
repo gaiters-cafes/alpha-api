@@ -2,9 +2,15 @@ name: Build Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - 'main'
+    paths:
+      - 'app/**'
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - 'main'
+    paths:
+      - 'app/**'
 
 jobs:
   build:
@@ -16,6 +22,6 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y podman
-    - name: Build the Docker image
+    - name: Build the OCI image
       working-directory: ./app
       run: podman build . --file Containerfile --tag my-image-name:$(date +%s)
