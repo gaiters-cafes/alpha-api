@@ -1,0 +1,23 @@
+FROM public.ecr.aws/docker/library/python:3.12.5-alpine3.19
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV LOG_LEVEL=DEBUG
+
+WORKDIR /app
+
+COPY pyproject.toml poetry.lock* /app/
+
+RUN pip install poetry
+
+RUN poetry install --no-root --only main
+
+COPY alpha_api /app/alpha_api
+
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+EXPOSE 8000
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+

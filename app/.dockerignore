@@ -1,0 +1,5 @@
+Dockerfile
+.pytest_cache
+.app.egg-info
+.vscode
+.config
