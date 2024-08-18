@@ -1,0 +1,15 @@
+networks:
+  av-network:
+
+services:
+  web:
+    build:
+      context: ./app
+      dockerfile: Containerfile
+    image: av-api
+    ports:
+      - "8000:8000"
+    networks:
+      - av-network
+    env_file:
+      - .env

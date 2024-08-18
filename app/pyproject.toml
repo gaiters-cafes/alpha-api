@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "alpha-api"
+version = "0.1.0"
+description = ""
+authors = ["gaiters-cafes <gaiters.cafes@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.112.1"
+uvicorn = "^0.30.6"
+requests = "^2.32.3"
+pydantic-settings = "^2.4.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pyclean = "^3.0.0"
+httpx = "^0.27.0"
+pytest = "^8.3.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
