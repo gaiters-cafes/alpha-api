@@ -1,6 +1,8 @@
 # App specific
 .config
 .DS_Store
+chart/avapi-chart/files
+chart/avapi-chart/charts
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

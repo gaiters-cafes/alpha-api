@@ -1,0 +1,9 @@
+apiVersion: v2
+name: avapi-chart
+description: A Helm chart for deploying alpha vantage wrapper api
+
+type: application
+
+version: 0.1.0
+
+appVersion: "1.0.0"

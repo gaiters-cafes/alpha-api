@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "avapi-chart.name" . }}
+  labels:
+    app: {{ include "avapi-chart.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "avapi-chart.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "avapi-chart.name" . }}
+    spec:
+      imagePullSecrets:
+      - name: do-registry
+      containers:
+        - name: av-api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+          - name: API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "avapi-chart.name" . }}-env
+                key: .env
+          - name: LOG_LEVEL
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "avapi-chart.name" . }}-env
+                key: .env
