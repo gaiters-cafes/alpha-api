@@ -1,0 +1,13 @@
+name: Deploy OCI Image
+on:
+  workflow_run:
+    workflows: ["Push OCI Image"]
+    types:
+      - completed
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy OCI Image
+        run: deploy-scripts/deploy.sh
