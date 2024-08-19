@@ -34,3 +34,5 @@ spec:
               secretKeyRef:
                 name: {{ include "avapi-chart.name" . }}-env
                 key: .env
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

@@ -1,4 +1,4 @@
-replicaCount: 1
+replicaCount: 2
 
 image:
   repository: registry.digitalocean.com/gaiters-cafes/av-api
@@ -19,5 +19,17 @@ service:
 #     - host: chart-example.local
 #       paths: []
 #   tls: []
+ 
+resources:
+  requests:
+    cpu: "500m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1024Mi"
 
-
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 75

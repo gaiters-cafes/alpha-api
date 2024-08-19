@@ -42,4 +42,10 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
-
+{{/*
+Selector labels
+*/}}
+{{- define "avapi-chart.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "avapi-chart.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
